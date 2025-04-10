@@ -1,0 +1,70 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Language {
+  id       Int       @id @default(autoincrement())
+  code     String    @unique
+  name     String
+  versions Version[]
+}
+
+model Version {
+  id         Int       @id @default(autoincrement())
+  language   Language  @relation(fields: [languageId], references: [id])
+  languageId Int
+  code       String    @unique
+  name       String
+  verses     Verse[]
+}
+
+model Book {
+  id           Int       @id @default(autoincrement())
+  name         String
+  slug         String    @unique
+  number       Int
+  chapters     Chapter[]
+}
+
+model Chapter {
+  id         Int       @id @default(autoincrement())
+  book       Book      @relation(fields: [bookId], references: [id])
+  bookId     Int
+  chapterNum Int
+  verses     Verse[]
+  
+  @@unique([bookId, chapterNum])
+}
+
+model Verse {
+  id           Int       @id @default(autoincrement())
+  version      Version   @relation(fields: [versionId], references: [id])
+  versionId    Int
+  chapter      Chapter   @relation(fields: [chapterId], references: [id])
+  chapterId    Int
+  verseNumber  Int
+  text         String
+  audios       Audio[]
+  
+  @@unique([versionId, chapterId, verseNumber])
+}
+
+model Audio {
+  id         Int     @id @default(autoincrement())
+  verse      Verse   @relation(fields: [verseId], references: [id])
+  verseId    Int
+  language   String  // language code for the audio file
+  url        String  // location/url of the audio file
+  duration   Int?    // duration in seconds
+  format     String? // e.g., "mp3", "aac"
+  
+  @@index([verseId])
+} 
