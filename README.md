@@ -13,6 +13,8 @@ The API is designed for offline-capable client applications (e.g., React Native)
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
   - [Database Setup](#database-setup)
+  - [Data Ingestion](#data-ingestion)
+  - [Audio Attachments](#audio-attachments)
   - [Running the Server](#running-the-server)
 - [API Documentation](#api-documentation)
 - [Known Issues & Solutions](#known-issues-solutions)
@@ -109,15 +111,168 @@ The backend is organized into a modular Express application with the following k
    npm run prisma:generate
    ```
 
-4. **Seed the Database (Optional):**
+### Data Ingestion
 
-   You can seed the database with Bible data by providing a JSON file:
+The project includes several tools for data ingestion and management:
+
+1. **Validate Bible Data:**
+
+   Before seeding, you can validate your Bible data JSON file format:
 
    ```bash
-   npm run seed -- scripts/example-bible-data.json
+   npm run validate path/to/your-bible-data.json
    ```
 
-   This project includes an example JSON file with a small subset of Bible data. For a complete Bible dataset, you'll need to create or obtain a more comprehensive JSON file following the same format.
+   This script checks if the Bible data follows the expected format and structure.
+
+2. **Seed Bible Data:**
+
+   After validation, seed the database with your Bible data:
+
+   ```bash
+   npm run seed path/to/your-bible-data.json
+   ```
+
+   The expected JSON format is:
+
+   ```json
+   {
+     "language": {
+       "code": "en",
+       "name": "English"
+     },
+     "version": {
+       "code": "KJV",
+       "name": "King James Version"
+     },
+     "books": [
+       {
+         "name": "Genesis",
+         "slug": "genesis",
+         "number": 1,
+         "chapters": [
+           {
+             "chapterNum": 1,
+             "verses": [
+               {
+                 "verseNumber": 1,
+                 "text": "In the beginning God created the heaven and the earth.",
+                 "audios": [
+                   {
+                     "language": "en",
+                     "url": "https://example.com/audio/gen/1-1.mp3",
+                     "duration": 5,
+                     "format": "mp3"
+                   }
+                 ]
+               }
+             ]
+           }
+         ]
+       }
+     ]
+   }
+   ```
+
+   You can include audio attachments directly in the Bible data file or add them later.
+
+3. **Load Bible Data from Folder Structure:**
+
+   Alternatively, you can load Bible data organized in folders:
+
+   ```bash
+   npm run load-folder [language_code]
+   ```
+
+   For example:
+   ```bash
+   npm run load-folder rongbsi
+   ```
+
+   The expected folder structure is:
+   ```
+   /data
+     /[language_code] (e.g., rongbsi)
+       /[book_slug] (e.g., genesis)
+         /1.json (chapter 1)
+         /2.json (chapter 2)
+         ...
+   ```
+
+   Each chapter JSON file should follow this format:
+   ```json
+   {
+     "book": "THAUREYMEI",
+     "slug": "thaureymei",
+     "chapter": 1,
+     "language": "ruanglat",
+     "content": [
+       { "heading": "Chapter Title" },
+       { "1": "Verse text for verse 1" },
+       { "2": "Verse text for verse 2" }
+     ]
+   }
+   ```
+
+### Audio Attachments
+
+Audio files can be attached to existing verses in two ways:
+
+1. **During Initial Seeding:**
+   
+   Include the `audios` array for each verse in your Bible data JSON file.
+
+2. **Separate Audio Attachment:**
+
+   For attaching audio files to existing verses after initial seeding:
+
+   ```bash
+   npm run attach-audio path/to/audio-attachments.json
+   ```
+
+   The audio attachments file should have the following format:
+
+   ```json
+   [
+     {
+       "versionCode": "KJV",
+       "bookSlug": "john",
+       "chapterNum": 1,
+       "verseNumber": 1,
+       "audio": {
+         "language": "en",
+         "url": "https://example.com/audio/john/1-1.mp3",
+         "duration": 5,
+         "format": "mp3"
+       }
+     }
+   ]
+   ```
+
+   This approach is useful for:
+   - Adding audio files in batches
+   - Managing audio files separately from text content
+   - Updating existing audio files
+
+3. **Generate Audio Data for Folder-Based Bible Data:**
+
+   If you've loaded Bible data using the folder structure approach, you can generate an audio attachment file:
+
+   ```bash
+   npm run generate-audio [language_code] [output_path]
+   ```
+
+   For example:
+   ```bash
+   npm run generate-audio rongbsi data/rongbsi-audio.json
+   ```
+
+   This will create a JSON file with audio entries for each verse, which you can then edit to include actual audio URLs.
+   After editing the file, you can attach the audio files:
+
+   ```bash
+   npm run attach-audio data/rongbsi-audio.json
+   ```
 
 ### Running the Server
 

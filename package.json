@@ -11,6 +11,10 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "seed": "ts-node scripts/seed.ts",
+    "validate": "ts-node scripts/validate-data.ts",
+    "attach-audio": "ts-node scripts/attach-audio.ts",
+    "load-folder": "ts-node scripts/load-folder-data.ts",
+    "generate-audio": "ts-node scripts/generate-audio-data.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"
