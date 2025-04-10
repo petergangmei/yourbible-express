@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -18,61 +15,61 @@ model Language {
 }
 
 model Version {
-  id         Int       @id @default(autoincrement())
-  language   Language  @relation(fields: [languageId], references: [id])
+  id         Int      @id @default(autoincrement())
   languageId Int
-  code       String    @unique
+  code       String   @unique
   name       String
   verses     Verse[]
+  language   Language @relation(fields: [languageId], references: [id])
 }
 
 model Book {
-  id           Int       @id @default(autoincrement())
-  name         String
-  slug         String    @unique
-  number       Int
-  chapters     Chapter[]
+  id       Int       @id @default(autoincrement())
+  name     String
+  slug     String    @unique
+  number   Int
+  chapters Chapter[]
 
   @@index([number])
 }
 
 model Chapter {
-  id         Int       @id @default(autoincrement())
-  book       Book      @relation(fields: [bookId], references: [id])
+  id         Int     @id @default(autoincrement())
   bookId     Int
   chapterNum Int
+  book       Book    @relation(fields: [bookId], references: [id])
   verses     Verse[]
-  
+
   @@unique([bookId, chapterNum])
   @@index([bookId])
   @@index([chapterNum])
 }
 
 model Verse {
-  id           Int       @id @default(autoincrement())
-  version      Version   @relation(fields: [versionId], references: [id])
-  versionId    Int
-  chapter      Chapter   @relation(fields: [chapterId], references: [id])
-  chapterId    Int
-  verseNumber  Int
-  text         String
-  audios       Audio[]
-  
+  id          Int     @id @default(autoincrement())
+  versionId   Int
+  chapterId   Int
+  verseNumber Int
+  text        String
+  audios      Audio[]
+  chapter     Chapter @relation(fields: [chapterId], references: [id])
+  version     Version @relation(fields: [versionId], references: [id])
+
   @@unique([versionId, chapterId, verseNumber])
   @@index([versionId])
   @@index([chapterId])
   @@index([verseNumber])
-  @@index([text]) // For text search
+  @@index([text])
 }
 
 model Audio {
-  id         Int     @id @default(autoincrement())
-  verse      Verse   @relation(fields: [verseId], references: [id])
-  verseId    Int
-  language   String  // language code for the audio file
-  url        String  // location/url of the audio file
-  duration   Int?    // duration in seconds
-  format     String? // e.g., "mp3", "aac"
-  
+  id       Int     @id @default(autoincrement())
+  verseId  Int
+  language String
+  url      String
+  duration Int?
+  format   String?
+  verse    Verse   @relation(fields: [verseId], references: [id])
+
   @@index([verseId])
-} 
+}
