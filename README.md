@@ -15,6 +15,7 @@ The API is designed for offline-capable client applications (e.g., React Native)
   - [Database Setup](#database-setup)
   - [Running the Server](#running-the-server)
 - [API Documentation](#api-documentation)
+- [Known Issues & Solutions](#known-issues-solutions)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -137,9 +138,51 @@ The server will start on the port specified in your `.env` file (default: 3000).
 
 ## API Documentation
 
-Currently in development. The following endpoint will be available:
+The API is documented using Swagger UI. Once the server is running, you can access the documentation at:
 
-- `GET /bible/:languageCode` - Retrieve Bible data for a specific language
+- `http://localhost:3000/api-docs` 
+
+The following endpoints are available:
+
+- `GET /bible/language/:languageCode` - Retrieve Bible data for a specific language
+- `GET /bible/version/:versionCode` - Retrieve Bible data for a specific version
+- `GET /bible/version/:versionCode/book/:bookSlug` - Retrieve a specific book
+- `GET /bible/version/:versionCode/book/:bookSlug/chapter/:chapterNum` - Retrieve a specific chapter
+- `GET /bible/version/:versionCode/book/:bookSlug/chapter/:chapterNum/verse/:verseNum` - Retrieve a specific verse
+- `GET /bible/search?query=text` - Search for verses containing specific text
+
+## Known Issues & Solutions
+
+### Database Schema Management
+
+When using a shared database that already contains tables (e.g., from Django or other applications), you may encounter schema conflicts. Here are solutions:
+
+1. **Use a Schema Parameter**: Add `?schema=bible_api` to your PostgreSQL connection URL in `.env`:
+   ```
+   DATABASE_URL="postgresql://user:password@localhost:5432/database?schema=bible_api"
+   ```
+   This will create tables in a separate schema to avoid conflicts.
+
+2. **Run Migrations in Create-Only Mode First**: 
+   ```bash
+   npx prisma migrate dev --name init --create-only
+   ```
+   This allows you to review migrations before applying them.
+
+3. **Database Reset Alternative**: If you need a clean slate and have permission, you can reset the schema:
+   ```bash
+   npx prisma migrate reset --schema-only
+   ```
+   (Only use this if you understand the implications)
+
+### Troubleshooting Connection Issues
+
+If you encounter database connection issues:
+
+1. Verify the DATABASE_URL in your `.env` file
+2. Ensure the database user has appropriate permissions
+3. Check if the database server allows connections from your IP
+4. Validate that appropriate schemas exist or can be created by your user
 
 ## Contributing
 

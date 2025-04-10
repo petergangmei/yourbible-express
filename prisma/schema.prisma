@@ -2,14 +2,12 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["multiSchema"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  schemas  = ["bible_api"]
 }
 
 model Language {
@@ -17,8 +15,6 @@ model Language {
   code     String    @unique
   name     String
   versions Version[]
-
-  @@schema("bible_api")
 }
 
 model Version {
@@ -28,8 +24,6 @@ model Version {
   code       String    @unique
   name       String
   verses     Verse[]
-
-  @@schema("bible_api")
 }
 
 model Book {
@@ -40,7 +34,6 @@ model Book {
   chapters     Chapter[]
 
   @@index([number])
-  @@schema("bible_api")
 }
 
 model Chapter {
@@ -53,7 +46,6 @@ model Chapter {
   @@unique([bookId, chapterNum])
   @@index([bookId])
   @@index([chapterNum])
-  @@schema("bible_api")
 }
 
 model Verse {
@@ -71,7 +63,6 @@ model Verse {
   @@index([chapterId])
   @@index([verseNumber])
   @@index([text]) // For text search
-  @@schema("bible_api")
 }
 
 model Audio {
@@ -84,5 +75,4 @@ model Audio {
   format     String? // e.g., "mp3", "aac"
   
   @@index([verseId])
-  @@schema("bible_api")
 } 
