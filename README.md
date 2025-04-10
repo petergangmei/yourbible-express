@@ -108,6 +108,16 @@ The backend is organized into a modular Express application with the following k
    npm run prisma:generate
    ```
 
+4. **Seed the Database (Optional):**
+
+   You can seed the database with Bible data by providing a JSON file:
+
+   ```bash
+   npm run seed -- scripts/example-bible-data.json
+   ```
+
+   This project includes an example JSON file with a small subset of Bible data. For a complete Bible dataset, you'll need to create or obtain a more comprehensive JSON file following the same format.
+
 ### Running the Server
 
 1. **Development Mode:**

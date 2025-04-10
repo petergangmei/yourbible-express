@@ -10,6 +10,12 @@ import { PrismaClient } from '@prisma/client';
 // Import routes
 import bibleRoutes from './routes/bible';
 
+// Import middleware
+import { errorMiddleware, notFoundMiddleware } from './middleware/errorMiddleware';
+
+// Import utils
+import { setupSwagger } from './utils/swagger';
+
 // Load environment variables
 dotenv.config();
 
@@ -40,23 +46,54 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// Basic root route
+// Setup Swagger
+setupSwagger(app);
+
+// API Routes
 app.get('/', (req, res) => {
-  res.json({ message: 'Welcome to YourBible.in API' });
+  res.json({ 
+    message: 'Welcome to YourBible.in API',
+    version: '1.0.0',
+    documentation: '/api-docs',
+    endpoints: {
+      bible: '/bible',
+      search: '/bible/search',
+      language: '/bible/language/:languageCode',
+      version: '/bible/version/:versionCode',
+      book: '/bible/version/:versionCode/book/:bookSlug',
+      chapter: '/bible/version/:versionCode/book/:bookSlug/chapter/:chapterNum',
+      verse: '/bible/version/:versionCode/book/:bookSlug/chapter/:chapterNum/verse/:verseNum'
+    }
+  });
 });
 
-// Apply routes
+// Apply API routes
 app.use('/bible', bibleRoutes);
 
+// Apply error handling middleware
+app.use(notFoundMiddleware);
+app.use(errorMiddleware);
+
 // Start server
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
+  console.log(`Environment: ${process.env.NODE_ENV}`);
+  console.log(`API Documentation: http://localhost:${port}/api-docs`);
 });
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err) => {
   console.error('Unhandled Rejection:', err);
-  // Proper error handling in production would be more sophisticated
+  // Close server & exit process
+  server.close(() => process.exit(1));
+});
+
+// Handle SIGTERM
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received. Shutting down gracefully');
+  server.close(() => {
+    console.log('Process terminated');
+  });
 });
 
 // Export Prisma client for use in other files
